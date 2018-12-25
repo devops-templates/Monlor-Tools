@@ -127,6 +127,18 @@ get_config() {
 
 }
 
+rngconfig() {
+
+	killall rngd > /dev/null 2>&1
+	logsh "【$service】" "开启rng进程..."
+	service_start $BIN/rngd -r /dev/urandom
+	if [ $? -ne 0 ]; then
+	    	logsh "【$service】" "启动失败！"
+	    	exit
+	fi
+     
+}
+
 dnsconfig() {
 
 	insmod ipt_REDIRECT 2>/dev/null
@@ -328,6 +340,8 @@ start() {
 
 	get_config
 
+	rngconfig            
+
 	dnsconfig            
 
 	load_nat
@@ -452,6 +466,7 @@ stop() {
 	killall -9 ss-local > /dev/null 2>&1
 	killall -9 ssr-local > /dev/null 2>&1
 	killall -9 dns2socks > /dev/null 2>&1
+	killall -9 rngd > /dev/null 2>&1
 	#删除定时规则
 	cru d "$appname"
 	cru d "$appname"_online
